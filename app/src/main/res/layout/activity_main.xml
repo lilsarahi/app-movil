@@ -1,27 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
+    android:background="#00A8A0A0"
     android:gravity="center"
+    android:orientation="vertical"
     android:padding="24dp">
-
-    <EditText
-        android:id="@+id/ingtexto"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Escribe algo aquí..."
-        android:inputType="text"
-        android:padding="12dp"
-        android:layout_marginBottom="16dp"/>
-
-    <Button
-        android:id="@+id/btnAceptar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Aceptar"
-        android:layout_marginBottom="24dp"/>
 
     <TextView
         android:id="@+id/resultado"
@@ -29,6 +14,28 @@
         android:layout_height="wrap_content"
         android:text="El texto aparecerá aquí"
         android:textSize="18sp"
-        android:textStyle="bold"/>
+        android:textStyle="bold" />
+
+
+    <EditText
+        android:id="@+id/ingtexto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:hint="Escribe algo aquí..."
+        android:inputType="text"
+        android:padding="12dp" />
+
+    <Button
+        android:id="@+id/btnAceptar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:background="#2196F3"
+        android:backgroundTint="#2196F3"
+        android:text="Aceptar"
+        android:textColorLink="#2196F3"
+        app:iconTint="#2196F3" />
+
 
 </LinearLayout>

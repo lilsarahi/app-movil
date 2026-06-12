@@ -22,6 +22,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "FirstBoton"
+rootProject.name = "My Application"
 include(":app")
- 
+include(":myapplication")
