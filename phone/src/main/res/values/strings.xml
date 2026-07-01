@@ -1,3 +1,17 @@
 <resources>
     <string name="app_name">phone</string>
+    <string name="status_connection">Estado de la conexión</string>
+    <string name="hint_message">Escribe mensaje</string>
+    <string name="btn_init_connection">1. Vincular Reloj</string>
+    <string name="btn_history">Historial de Mensajes (GET)</string>
+    <string name="btn_send_save">Enviar y Guardar (POST)</string>
+    <string name="msg_connected_watch">Conectado al reloj: %1$s</string>
+    <string name="msg_no_nodes">No se encontraron nodos</string>
+    <string name="msg_from_watch">Reloj dice: %1$s</string>
+    <string name="msg_history_empty">El historial está vacío</string>
+    <string name="msg_sent_both">Enviado a Reloj y DB</string>
+    <string name="msg_sent_db_only">Reloj no vinculado. Guardado solo en DB.</string>
+    <string name="msg_write_something">Escribe algo primero</string>
+    <string name="error_connect">Error al conectar</string>
+    <string name="btn_connect_send" />
 </resources>

@@ -1,4 +1,9 @@
 <resources>
-    <string name="app_name">My Application</string>
-    <string name="hello_world">Hello, %1$s!</string>
+    <string name="app_name">wear</string>
+    <string name="label_chat_wear">Chat Wear</string>
+    <string name="hint_message">Mensaje...</string>
+    <string name="btn_send">Enviar</string>
+    <string name="msg_connected_phone">Conectado al Teléfono: %1$s</string>
+    <string name="msg_no_phone">No se encontró teléfono</string>
+    <string name="msg_from_phone">Teléfono: %1$s</string>
 </resources>

@@ -8,15 +8,14 @@ import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.activity.ComponentActivity
 import com.example.myapplication.R
 import com.google.android.gms.tasks.Tasks
 import com.google.android.gms.wearable.*
 import kotlinx.coroutines.*
 import java.nio.charset.StandardCharsets
 
-class MainActivity : AppCompatActivity(),
+class MainActivity : ComponentActivity(),
     CoroutineScope by MainScope(),
     DataClient.OnDataChangedListener,
     MessageClient.OnMessageReceivedListener,
@@ -28,32 +27,37 @@ class MainActivity : AppCompatActivity(),
     var activityContext: Context? = null
 
     private var deviceConnected: Boolean = false
-    private val PAYLOAD_PATH = "/APP_OPEN"
+    private val payloadPath = "/APP_OPEN"
     lateinit var nodeID: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        installSplashScreen()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        
+        // No apagar pantalla
+        window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         
         activityContext = this
         conectar = findViewById(R.id.boton)
         textoIng = findViewById(R.id.ingtexto)
         lResultado = findViewById(R.id.resultado)
 
+        // Boton para vincular o mandar mensaje
         conectar.setOnClickListener {
             if (!deviceConnected) {
                 val tempAct: Activity = activityContext as MainActivity
                 getNodes(tempAct)
             } else {
-                val mensaje = textoIng.text.toString()
+                val mensaje = textoIng.text.toString().trim()
                 if (mensaje.isNotEmpty()) {
                     sendMessage(mensaje)
+                    textoIng.setText("")
                 }
             }
         }
     }
 
+    // Buscar celular
     private fun getNodes(context: Context) {
         launch(Dispatchers.Default) {
             val nodeList = Wearable.getNodeClient(context).connectedNodes
@@ -63,18 +67,16 @@ class MainActivity : AppCompatActivity(),
                     nodeID = node.id
                     deviceConnected = true
                 }
-                if (deviceConnected) {
-                    withContext(Dispatchers.Main) {
-                        lResultado.text = "Conectado al Teléfono: $nodeID"
-                        conectar.text = "Enviar"
-                    }
-                } else {
-                    withContext(Dispatchers.Main) {
-                        lResultado.text = "No se encontró teléfono"
+                withContext(Dispatchers.Main) {
+                    if (deviceConnected) {
+                        lResultado.text = getString(R.string.msg_connected_phone, nodeID)
+                        conectar.text = getString(R.string.btn_send)
+                    } else {
+                        lResultado.text = getString(R.string.msg_no_phone)
                     }
                 }
-            } catch (exception: Exception) {
-                Log.d("Error en el nodo", exception.toString())
+            } catch (e: Exception) {
+                Log.e("Error", "No hay nodos")
             }
         }
     }
@@ -85,9 +87,7 @@ class MainActivity : AppCompatActivity(),
             Wearable.getDataClient(activityContext!!).removeListener(this)
             Wearable.getMessageClient(activityContext!!).removeListener(this)
             Wearable.getCapabilityClient(activityContext!!).removeListener(this)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        } catch (e: Exception) {}
     }
 
     override fun onResume() {
@@ -97,39 +97,30 @@ class MainActivity : AppCompatActivity(),
             Wearable.getMessageClient(activityContext!!).addListener(this)
             Wearable.getCapabilityClient(activityContext!!)
                 .addListener(this, Uri.parse("wear://"), CapabilityClient.FILTER_REACHABLE)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        } catch (e: Exception) {}
     }
 
+    // Mandar mensaje al telefono
     private fun sendMessage(mensaje: String) {
         if (!deviceConnected) return
         
-        val sendMessageTask = Wearable.getMessageClient(activityContext!!)
-            .sendMessage(nodeID, PAYLOAD_PATH, mensaje.toByteArray(StandardCharsets.UTF_8))
-            
-        sendMessageTask.addOnSuccessListener {
-            Log.d("sendMessage", "Mensaje enviado desde reloj")
-            textoIng.setText("")
-        }.addOnFailureListener { e ->
-            Log.d("sendMessage", "Error en reloj: ${e.message}")
-        }
+        Wearable.getMessageClient(activityContext!!)
+            .sendMessage(nodeID, payloadPath, mensaje.toByteArray(StandardCharsets.UTF_8))
     }
 
+    // Recibir mensaje del telefono
     override fun onMessageReceived(messageEvent: MessageEvent) {
         val message = String(messageEvent.data, StandardCharsets.UTF_8)
-        
         nodeID = messageEvent.sourceNodeId
         deviceConnected = true
 
         runOnUiThread {
-            lResultado.text = "Teléfono: $message"
-            conectar.text = "Enviar"
+            lResultado.text = getString(R.string.msg_from_phone, message)
+            conectar.text = getString(R.string.btn_send)
         }
     }
 
     override fun onDataChanged(dataEvents: DataEventBuffer) {}
-
     override fun onCapabilityChanged(capabilityInfo: CapabilityInfo) {}
 
     override fun onDestroy() {

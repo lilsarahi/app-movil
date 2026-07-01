@@ -3,19 +3,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#00A8A0A0"
     android:gravity="center"
     android:orientation="vertical"
     android:padding="24dp">
 
     <TextView
         android:id="@+id/resultado"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="El texto aparecerá aquí"
-        android:textSize="18sp"
-        android:textStyle="bold" />
-
+        android:layout_marginBottom="24dp"
+        android:text="Los mensajes aparecerán aquí"
+        android:textSize="16sp"
+        android:minHeight="80dp" />
 
     <EditText
         android:id="@+id/ingtexto"
@@ -28,14 +27,15 @@
 
     <Button
         android:id="@+id/btnAceptar"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp"
-        android:background="#2196F3"
-        android:backgroundTint="#2196F3"
-        android:text="Aceptar"
-        android:textColorLink="#2196F3"
-        app:iconTint="#2196F3" />
+        android:layout_marginBottom="12dp"
+        android:text="Guardar mensaje" />
 
+    <Button
+        android:id="@+id/btnCargar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Cargar mensajes" />
 
 </LinearLayout>

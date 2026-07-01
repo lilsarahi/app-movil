@@ -12,7 +12,26 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.tasks.Tasks
 import com.google.android.gms.wearable.*
 import kotlinx.coroutines.*
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.Body
+import retrofit2.http.GET
+import retrofit2.http.POST
 import java.nio.charset.StandardCharsets
+
+data class MensajeDB(
+    val usuario: String,
+    val contenido: String,
+    val _id: String? = null
+)
+
+interface ApiService {
+    @GET("mensajes")
+    suspend fun obtenerMensajes(): List<MensajeDB>
+
+    @POST("mensajes")
+    suspend fun enviarMensaje(@Body mensaje: MensajeDB): MensajeDB
+}
 
 class MainActivity : AppCompatActivity(),
     CoroutineScope by MainScope(),
@@ -21,13 +40,22 @@ class MainActivity : AppCompatActivity(),
     CapabilityClient.OnCapabilityChangedListener {
 
     lateinit var conectar: Button
+    lateinit var btnGet: Button
+    lateinit var btnPost: Button
     lateinit var textoIng: EditText
     lateinit var lResultado: TextView
     var activityContext: Context? = null
 
     private var deviceConnected: Boolean = false
-    private val PAYLOAD_PATH = "/APP_OPEN"
+    private val payloadPath = "/APP_OPEN"
     lateinit var nodeID: String
+
+    private val retrofit = Retrofit.Builder()
+        .baseUrl("http://10.0.2.2:3000/") 
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+
+    private val apiService = retrofit.create(ApiService::class.java)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,20 +63,79 @@ class MainActivity : AppCompatActivity(),
         activityContext = this
         
         conectar = findViewById(R.id.boton)
+        btnGet = findViewById(R.id.btnGet)
+        btnPost = findViewById(R.id.btnPost)
         textoIng = findViewById(R.id.ingtexto)
         lResultado = findViewById(R.id.resultado)
 
+        // Vincular el reloj
         conectar.setOnClickListener {
-            if (!deviceConnected) {
-                val tempAct: Activity = activityContext as MainActivity
-                getNodes(tempAct)
+            val tempAct: Activity = activityContext as MainActivity
+            getNodes(tempAct)
+        }
+
+        // Mandar mensaje y guardar en base de datos
+        btnPost.setOnClickListener {
+            val mensaje = textoIng.text.toString().trim()
+            if (mensaje.isEmpty()) {
+                lResultado.text = getString(R.string.msg_write_something)
+                return@setOnClickListener
+            }
+
+            if (deviceConnected) {
+                enviarAlReloj(mensaje)
+                guardarEnDB("Phone", mensaje)
+                lResultado.text = getString(R.string.msg_sent_both)
             } else {
-                val mensaje = textoIng.text.toString()
-                if (mensaje.isNotEmpty()) {
-                    sendMessage(mensaje)
+                guardarEnDB("Phone (Solo DB)", mensaje)
+                lResultado.text = getString(R.string.msg_sent_db_only)
+            }
+            textoIng.setText("")
+        }
+
+        // Boton historial
+        btnGet.setOnClickListener {
+            traerHistorial()
+        }
+    }
+
+    private fun traerHistorial() {
+        launch(Dispatchers.IO) {
+            try {
+                val lista = apiService.obtenerMensajes()
+                withContext(Dispatchers.Main) {
+                    if (lista.isEmpty()) {
+                        lResultado.text = getString(R.string.msg_history_empty)
+                    } else {
+                        val sb = StringBuilder("--- HISTORIAL ---\n")
+                        lista.takeLast(10).forEach {
+                            sb.append("${it.usuario}: ${it.contenido}\n")
+                        }
+                        lResultado.text = sb.toString()
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    lResultado.text = getString(R.string.error_connect)
                 }
             }
         }
+    }
+
+    private fun guardarEnDB(usuario: String, contenido: String) {
+        launch(Dispatchers.IO) {
+            try {
+                val nuevo = MensajeDB(usuario, contenido)
+                apiService.enviarMensaje(nuevo)
+            } catch (e: Exception) {
+                Log.e("Error", "No se guardo")
+            }
+        }
+    }
+
+    private fun enviarAlReloj(mensaje: String) {
+        Wearable.getMessageClient(activityContext!!)
+            .sendMessage(nodeID, payloadPath, mensaje.toByteArray(StandardCharsets.UTF_8))
     }
 
     private fun getNodes(context: Context) {
@@ -57,23 +144,18 @@ class MainActivity : AppCompatActivity(),
             try {
                 val nodes = Tasks.await(nodeList)
                 for (node in nodes) {
-                    Log.d("NODO", node.toString())
-                    Log.d("NODO", "El id del nodo es: ${node.id}")
                     nodeID = node.id
                     deviceConnected = true
                 }
-                if (deviceConnected) {
-                    withContext(Dispatchers.Main) {
-                        lResultado.text = "Conectado al reloj: $nodeID"
-                        conectar.text = "Enviar Mensaje"
-                    }
-                } else {
-                    withContext(Dispatchers.Main) {
-                        lResultado.text = "No se encontraron nodos"
+                withContext(Dispatchers.Main) {
+                    if (deviceConnected) {
+                        lResultado.text = getString(R.string.msg_connected_watch, nodeID)
+                    } else {
+                        lResultado.text = getString(R.string.msg_no_nodes)
                     }
                 }
-            } catch (exception: Exception) {
-                Log.d("Error en el nodo", exception.toString())
+            } catch (e: Exception) {
+                Log.e("Error", "No hay nodos")
             }
         }
     }
@@ -84,9 +166,7 @@ class MainActivity : AppCompatActivity(),
             Wearable.getDataClient(activityContext!!).removeListener(this)
             Wearable.getMessageClient(activityContext!!).removeListener(this)
             Wearable.getCapabilityClient(activityContext!!).removeListener(this)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        } catch (e: Exception) {}
     }
 
     override fun onResume() {
@@ -96,42 +176,22 @@ class MainActivity : AppCompatActivity(),
             Wearable.getMessageClient(activityContext!!).addListener(this)
             Wearable.getCapabilityClient(activityContext!!)
                 .addListener(this, Uri.parse("wear://"), CapabilityClient.FILTER_REACHABLE)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    private fun sendMessage(mensaje: String) {
-        val sendMessageTask = Wearable.getMessageClient(activityContext!!)
-            .sendMessage(nodeID, PAYLOAD_PATH, mensaje.toByteArray(StandardCharsets.UTF_8))
-            
-        sendMessageTask.addOnSuccessListener {
-            Log.d("sendMessage", "Mensaje enviado correctamente")
-            textoIng.setText("")
-        }.addOnFailureListener { e ->
-            Log.d("sendMessage", "Error al enviar mensaje ${e.message}")
-        }
+        } catch (e: Exception) {}
     }
 
     override fun onMessageReceived(messageEvent: MessageEvent) {
-        Log.d("onMessageReceived", messageEvent.toString())
         val message = String(messageEvent.data, StandardCharsets.UTF_8)
+        nodeID = messageEvent.sourceNodeId
+        deviceConnected = true
         
-        if (!deviceConnected) {
-            nodeID = messageEvent.sourceNodeId
-            deviceConnected = true
-            runOnUiThread {
-                conectar.text = "Enviar Mensaje"
-            }
-        }
-
         runOnUiThread {
-            lResultado.text = "Reloj dice: $message"
+            lResultado.text = getString(R.string.msg_from_watch, message)
         }
+        
+        guardarEnDB("Wear", message)
     }
 
     override fun onDataChanged(dataEvents: DataEventBuffer) {}
-
     override fun onCapabilityChanged(capabilityInfo: CapabilityInfo) {}
 
     override fun onDestroy() {

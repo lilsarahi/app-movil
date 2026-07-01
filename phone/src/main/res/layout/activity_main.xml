@@ -1,33 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/main"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp"
-    android:gravity="center">
+    android:fillViewport="true">
 
-    <TextView
-        android:id="@+id/resultado"
+    <LinearLayout
+        android:id="@+id/main"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Mensajes recibidos aparecerán aquí"
-        android:textSize="16sp"
-        android:layout_marginBottom="20dp"
-        android:textAlignment="center" />
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:gravity="center">
 
-    <EditText
-        android:id="@+id/ingtexto"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Escribe un mensaje"
-        android:layout_marginBottom="10dp" />
+        <TextView
+            android:id="@+id/resultado"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/status_connection"
+            android:textSize="14sp"
+            android:layout_marginBottom="20dp"
+            android:textAlignment="center" />
 
-    <Button
-        android:id="@+id/boton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Enviar" />
+        <EditText
+            android:id="@+id/ingtexto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/hint_message"
+            android:layout_marginBottom="10dp"
+            android:inputType="text"
+            android:autofillHints="none" />
 
-</LinearLayout>
+        <Button
+            android:id="@+id/boton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_init_connection"
+            android:layout_marginBottom="10dp" />
+
+        <Button
+            android:id="@+id/btnPost"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_send_save"
+            android:layout_marginBottom="20dp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"
+            android:layout_marginBottom="20dp" />
+
+        <Button
+            android:id="@+id/btnGet"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_history" />
+
+    </LinearLayout>
+</ScrollView>

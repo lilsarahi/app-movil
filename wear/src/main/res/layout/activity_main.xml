@@ -1,40 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="@android:color/black"
+    android:padding="16dp">
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/resultado"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:padding="16dp">
+        android:text="@string/label_chat_wear"
+        android:textColor="@android:color/white"
+        android:textSize="14sp"
+        android:textAlignment="center"
+        android:layout_marginBottom="8dp" />
 
-        <TextView
-            android:id="@+id/resultado"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Chat Wear"
-            android:textSize="12sp"
-            android:textAlignment="center"
-            android:layout_marginBottom="8dp" />
+    <EditText
+        android:id="@+id/ingtexto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/hint_message"
+        android:textColor="@android:color/white"
+        android:textColorHint="@android:color/darker_gray"
+        android:textSize="14sp"
+        android:inputType="text"
+        android:autofillHints="none"
+        android:layout_marginBottom="8dp" />
 
-        <EditText
-            android:id="@+id/ingtexto"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Escribe mensaje"
-            android:textSize="12sp"
-            android:inputType="text"
-            android:layout_marginBottom="8dp" />
+    <Button
+        android:id="@+id/boton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_send"
+        android:textSize="12sp" />
 
-        <Button
-            android:id="@+id/boton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Enviar"
-            android:textSize="10sp" />
-
-    </LinearLayout>
-</ScrollView>
+</LinearLayout>
